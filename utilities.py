@@ -1,10 +1,11 @@
+import random
 import string
 import hmac
 
-def orEncrypt(p:int,k:int):
+def xorEncrypt(p:int,k:int):
     return p ^ k
 
-def orDecrypt(c:int,k:int):
+def xorDecrypt(c:int,k:int):
     return c ^ k
 
 def adderEncrypt(p:int,k:int):
@@ -19,6 +20,9 @@ def adderEncrypt(p:int,k:int):
             ret = (ret << 1) | i
         return ret
     else:
+        print("Failed, not same size")
+        print(p)
+        print(k)
         return -4
 
 def sumer(p:int,k:int):
@@ -99,6 +103,18 @@ def hmac(message):
 def bitArray(n):
     return [1 if digit=='1' else 0 for digit in bin(n)[2:]]
 
-#TODO: Check en2
+def generateNumber(bits=10)-> int:
+    num = random.getrandbits(10)
+    if len(bitArray(num))==bits:
+        return num
+    else:
+        while len(bitArray(num))!=bits:
+            aux = bitArray(num)
+            for i in range(bits-len(bitArray(num))):
+                aux.append(1)
+            num = 0
+            for i in aux:
+                num = (num << 1) | i
+        return num
 
-print(HMAC(1,3))
+#TODO: Check en2
