@@ -4,8 +4,6 @@ from acquiringBank import AcquiringBank
 from consumer import Consumer
 import utilities
 
-#Make csk and all xs same bit size.
-
 if __name__ == '__main__':
     merchant = Merchant()
     acquiringBank = AcquiringBank()
