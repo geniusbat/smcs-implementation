@@ -1,3 +1,5 @@
+from datetime import time
+import time
 import string
 import random
 from typing import Dict, List
@@ -51,6 +53,7 @@ class Consumer():
         self.xA1 = 12
         self.xA2 = random.getrandbits(5)
         self.xA3 = random.getrandbits(5)
+        self.xB1 = 0
     def init(self,mer,iss):
         self.merchant=mer
         self.issuinBank=iss
@@ -73,17 +76,47 @@ class Consumer():
             if message["op-code"]==2:
                 #Step 1.3
                 self.csk = message["B"] ** self.xA % self.p
-                xB1 = utilities.xorDecrypt(int(message["2"]),self.csk)
-                if message["4"]==utilities.hmac(utilities.adderEncrypt(self.csk,xB1)):
-                    shoppingMessage = utilities.invEn2(self.csk,xB1,message["3"])
+                self.xB1 = utilities.xorDecrypt(int(message["2"]),self.csk)
+                if message["4"]==utilities.hmac(utilities.adderEncrypt(self.csk,self.xB1)):
+                    shoppingMessage = utilities.invEn2(self.csk,self.xB1,message["3"])
                     print("Shopping message received: ", shoppingMessage)
                     self.status = 4
                     message3 = dict()
                     message3["op-code"]=3; message3["consumerOrder"]=shoppingMessage.split(" ")[0]
                     message3["deliveryAddress"] = "Avenida Reina Mercedes"
-                    message3["3"] = utilities.en1(self.csk, xB1, self.xA1)
+                    message3["3"] = utilities.en1(self.csk, self.xB1, self.xA1)
                     message3["4"] = utilities.en2(self.csk, self.xA1, "Gustavo Molina, Avenida Reina Mercedes")
                     message3["5"] = utilities.hmac(utilities.adderEncrypt(self.xA1, self.csk))
                     self.merchant.send(message3)
+            elif message["op-code"]==4:
+                #Step 2.1
+                if utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk, self.xB1),self.xA1)) == message["2"]:
+                    shoppingAssociationMessage = utilities.invEn2(self.xA1, self.xB1, message["1"])
+                    print("Shopping association message: ", shoppingAssociationMessage)
+                    print("Request user's password: ")
+                    print("Password inputed")
+                    if hash(self.pw) == self.kPW:
+                        self.status=6
+                        message5 = dict()
+                        message5["op-code"]=5
+                        message5["tnonce"] = time.time(); message5["id"] = self.selfId
+                        message5["3"] = utilities.rsaEncrypt(self.xA2, self.e, self.N)
+                        message5["4"] = utilities.en1(self.xA2, utilities.xorEncrypt(self.xA2, self.kPW), self.xA3)
+                        paymentRequestMessage = str(self.csk) +", "+ str(self.xA1) +", "+ shoppingAssociationMessage
+                        message5["5"] = utilities.en2(self.xA2, utilities.xorEncrypt(self.xA3, int(time.time())),paymentRequestMessage)
+                        message5["6"] = utilities.xorEncrypt(self.xA1, utilities.aesResToInt(utilities.aesEncrypt(utilities.xorEncrypt(self.xA3, self.cAk),self.xA2)))
+                        message5["7"] = utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk, self.xA2), self.xA3))
+                        self.issuinBank.send(message5)
+                    else:
+                        print("Password was wrong")
+            elif message["op-code"]==6:
+                if utilities.hmac(utilities.xorEncrypt(self.xA2, self.xA3)) == message["2"]:
+                    result = utilities.invEn2(self.csk, self.xA1, message["1"]).split(", ")[1]
+                    print("The result of the request was: ", result)
+                    self.status = 8
+            elif message["op-code"]==8:
+                if message["2"] == utilities.hmac(utilities.adderEncrypt(self.csk, utilities.xorEncrypt(self.xA1, self.xB1))):
+                    self.status = 9
+                    print("The invoice for payment was: ", message["1"])
         else:
-            print("Status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])
+            print("Consumer's status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])

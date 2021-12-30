@@ -52,12 +52,21 @@ class Merchant():
                 if message["5"] == utilities.hmac(utilities.adderEncrypt(xA1,self.csk)):
                     consumerInfo = utilities.invEn2(self.csk, xA1, message["4"])
                     print("Consumer info: ", consumerInfo)
-                    self.status==5
+                    self.status=7 
                     message4 = dict()
                     message4["op-code"]=4
-                    shoppingAssociationMessage = consumerInfo + " BusinessCert 40$ bankCode-10222, AvdManuelAltolaguirre" + utilities.aesEncrypt(utilities.xorEncrypt(xA1,self.mAk,self.csk))  #TODO FINISHE aes
+                    shoppingAssociationMessage = consumerInfo + " , businessCert 40$ bankCode-10222, AvdManuelAltolaguirre, " + str(utilities.aesEncrypt(utilities.xorEncrypt(xA1,self.mAk),self.csk))
                     message4["1"]=utilities.en2(xA1,self.xB1,shoppingAssociationMessage)
-                    message4["2"]=utilities.hmac(utilities.xorEncrypt(self.csk,self.xB1))
+                    message4["2"]=utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk,self.xB1), xA1))
                     self.consumer.send(message4)
+            #4
+            elif message["op-code"] == 7:
+                self.status = 9
+                message9 = dict()
+                message9["op-code"] = 8
+                invoice = "This is the invoice"
+                message9["1"] = invoice
+                message9["2"] = utilities.hmac(utilities.adderEncrypt(self.csk, utilities.xorEncrypt(self.consumer.xA1,self.xB1)))
+                self.consumer.send(message9)
         else:
-            print("Status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])
+            print("Merchant's status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])

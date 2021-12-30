@@ -1,6 +1,8 @@
 import random
 import string
-import hmac
+import sys
+from Cryptodome.Cipher import AES
+from Cryptodome.Util import Padding
 from typing import List
 
 def xorEncrypt(p:int,k:int):
@@ -21,11 +23,25 @@ def rsaEncrypt(x:int,e:int,N:int):
 def rsaDecrypt(y:int,d:int,N:int):
     return y**d % N
 
-def aesEncrypt():
-    pass
+def aesEncrypt(data, key):
+    key = Padding.pad(bytes(key), 16)
+    if isinstance(data, str):
+        paddedData = Padding.pad(bytes(data, encoding='utf8'), 16)
+    else:
+        newData = chr(data)
+        paddedData = Padding.pad(bytes(newData, encoding='utf8'), 16)
+    cipher = AES.new(key,AES.MODE_ECB)
+    cText = cipher.encrypt(paddedData)
+    return cText
 
-def aesDecrypt():
-    pass
+def aesDecrypt(data, key):
+    key = Padding.pad(bytes(key), 16)
+    cipher = AES.new(key,AES.MODE_ECB)
+    plain = cipher.decrypt(data)
+    return Padding.unpad(plain,16).decode("utf-8")
+
+def aesResToInt(res):
+    return int.from_bytes(res, sys.byteorder)
 
 def en1(a:int,b:int,x:int):
     return x+a
@@ -70,3 +86,12 @@ def generateNumber(bits=10)-> int:
             for i in aux:
                 num = (num << 1) | i
         return num
+
+
+'''
+k = b'334444'
+t = "HOLA MUNDO"
+c = aesEncrypt(t,k)
+print()
+print(aesDecrypt(c,k))
+'''

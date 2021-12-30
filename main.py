@@ -11,5 +11,5 @@ if __name__ == '__main__':
     issuingBank = IssuingBank()
     merchant.init(consumer,acquiringBank)
     acquiringBank.init(issuingBank,merchant)
-    issuingBank.init(consumer,acquiringBank)
+    issuingBank.init(consumer,acquiringBank, merchant)
     consumer.init(merchant,issuingBank)
