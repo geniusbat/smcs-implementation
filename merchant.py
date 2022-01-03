@@ -7,7 +7,6 @@ class Merchant():
     status : int
 
     mAk : int #Merchant auth key
-    pXb : int #Unused
     xB1 : int 
     #Diffie
     xB : int
@@ -26,8 +25,6 @@ class Merchant():
     def init(self,con,acq):
         self.consumer=con
         self.acquiringBank=acq
-    def dynamicAuthCode(self):
-        pass
     def getTimeData(self):
         dt = datetime.utcnow()
         return [dt.date(),dt.time()]
@@ -35,6 +32,7 @@ class Merchant():
         if message["op-code"]==self.status:
             #step 1.2
             if message["op-code"] == 1:
+                print("Step 1.2: Message-1 received: ", message)
                 self.csk = message["A"] ** self.xB % message["p"]
                 self.status = 3
                 message2 = dict()
@@ -51,7 +49,7 @@ class Merchant():
                 xA1 = utilities.invEn1(self.csk, self.xB1, message["3"])
                 if message["5"] == utilities.hmac(utilities.adderEncrypt(xA1,self.csk)):
                     consumerInfo = utilities.invEn2(self.csk, xA1, message["4"])
-                    print("Consumer info: ", consumerInfo)
+                    print("Step 1.4: Consumer info: ", consumerInfo)
                     self.status=7 
                     message4 = dict()
                     message4["op-code"]=4

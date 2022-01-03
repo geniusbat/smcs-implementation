@@ -1,6 +1,7 @@
 import random
 import string
 import hmac
+from typing import List
 
 def xorEncrypt(p:int,k:int):
     return p ^ k
@@ -28,27 +29,34 @@ def adderEncrypt(p:int,k:int):
 def sumer(p:int,k:int):
     pb = bitArray(p)
     pk = bitArray(k)
+    ml = max(len(pb),len(pk))
+    if len(pb) < ml:
+        while(len(pb)<ml):
+            pb.insert(0,0)
+    if len(pk) < ml:
+        while(len(pk)<ml):
+            pk.insert(0,0)
     if len(pb) == len(pk):
         retb = []
         for i in range(len(pb)):
-            retb.append(pb[i]+pk[i])
-    elif len(pb) < len(pk):
-        retb = []
-        for i in range(len(pk)):
-            if i < len(pb):
-                retb.append(pb[i]+pk[i])
-            else:
-                retb.append(pk[i])
-    elif len(pb) > len(pk):
-        retb = []
-        for i in range(len(pb)):
-            if i < len(pk):
-                retb.append(pk[i]+pb[i])
-            else:
-                retb.append(pb[i])
+            aux = pb[i]+pk[i]
+            if aux == 0:
+                retb.append(0)
+            elif aux == 1:
+                retb.append(1)
+            elif aux == 2:
+                retb.append(0)
     ret = 0
     for i in retb:
         ret = (ret << 1) | i
+    return ret
+
+def rev(original:List,l):
+    ret = original.copy()
+    if len(ret) < l:
+        while(len(ret)<l):
+            ret.append(0)
+    ret.reverse()
     return ret
 
 def HMAC(message,key):
@@ -59,8 +67,10 @@ def adderDecrypt(c:int,k:int):
     if c >= k:
         return c - k
     else:
+        return k - c
         kC = 0
         aux = [1 if i == 0 else 0 for i in bitArray(k)]
+        print(aux)
         for i in aux:
             kC = (kC << 1) | i
         return c + 1 + kC
@@ -85,13 +95,15 @@ def invEn1(a:int,b:int,y:int):
 
 def en2(a:int,b:int,str:string):
     sl = [ord(i) for i in list(str)]
+    print(sl)
     c = ""
     for i in sl:
-        c += chr(sumer((i^a),b) % 256)
+        c += chr(sumer((i^a),b) )#% 256)
     return c
 
 def invEn2(a:int,b:int,cstr:string):
     cl = [ord(i) for i in list(cstr)]
+    print(cl)
     s = ""
     for i in cl:
         s += chr(adderDecrypt(i,b)^a % 256)
@@ -117,4 +129,22 @@ def generateNumber(bits=10)-> int:
                 num = (num << 1) | i
         return num
 
-#TODO: Check en2
+'''
+#Binary adder is not consistent
+#k = 5
+#a = 6
+k = 10
+a = 6
+c = sumer(a,k)
+print(bitArray(c))
+print("c: ",c)
+p = adderDecrypt(c,k)
+print(p)
+print(a==p)
+'''
+'''
+print(en1(10,3,112))
+print(invEn1(10,3,218))
+a = en2(10,3,"patatas,pepinos,huevos")
+print(invEn2(10,3,a))
+'''

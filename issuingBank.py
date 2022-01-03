@@ -19,12 +19,10 @@ class IssuingBank():
         self.consumer=con
         self.acquiringBank=acq
         self.merchant = mer
-    def getTimeData():
-        dt = datetime.utcnow()
-        return [dt.date(),dt.time()]
     def send(self,message:Dict):
         #Step 2.2
         if message["op-code"] == 5:
+            print("Step 2.2:")
             print("Card issuing bank checks if request is done before now")
             if time.time() - message["tnonce"] < 1000:
                 xA2 = utilities.rsaDecrypt(message["3"],self.consumer.d, self.consumer.N)

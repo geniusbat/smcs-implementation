@@ -27,7 +27,7 @@ class Consumer():
     cAk : int #Consumer Auth number
     pw : string #Password
     kPW : int #Password hash
-    pXa : int #Unused
+    pXa : int
     #Xes are random dynamic keys
     xA1 : int
     xA2 : int
@@ -58,6 +58,7 @@ class Consumer():
         self.merchant=mer
         self.issuinBank=iss
         #Start 1.1
+        print("Step 1.1: Consumer sending shopping list")
         self.status = 2
         message1 = dict()
         message1["op-code"] = 1; message1["A"] = self.g ** self.xA % self.p
@@ -65,12 +66,7 @@ class Consumer():
         message1["shoppingList"] = shoppingList
         message1["g"]=self.g
         message1["p"]=self.p
-        print("Message-1:",message1)
         self.merchant.send(message1)
-    def cardAuthCode(self):
-        pass
-    def getConsumerData(self):
-        return (self.selfId,self.e,self.N,self.kPW,self.cAk)
     def send(self,message:Dict):    
         if message["op-code"]==self.status:
             if message["op-code"]==2:
@@ -79,7 +75,7 @@ class Consumer():
                 self.xB1 = utilities.xorDecrypt(int(message["2"]),self.csk)
                 if message["4"]==utilities.hmac(utilities.adderEncrypt(self.csk,self.xB1)):
                     shoppingMessage = utilities.invEn2(self.csk,self.xB1,message["3"])
-                    print("Shopping message received: ", shoppingMessage)
+                    print("Step 1.3: Shopping message received: ", shoppingMessage)
                     self.status = 4
                     message3 = dict()
                     message3["op-code"]=3; message3["consumerOrder"]=shoppingMessage.split(" ")[0]
@@ -92,6 +88,7 @@ class Consumer():
                 #Step 2.1
                 if utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk, self.xB1),self.xA1)) == message["2"]:
                     shoppingAssociationMessage = utilities.invEn2(self.xA1, self.xB1, message["1"])
+                    print("Step 2.1")
                     print("Shopping association message: ", shoppingAssociationMessage)
                     print("Request user's password: ")
                     print("Password inputed")
@@ -117,6 +114,6 @@ class Consumer():
             elif message["op-code"]==8:
                 if message["2"] == utilities.hmac(utilities.adderEncrypt(self.csk, utilities.xorEncrypt(self.xA1, self.xB1))):
                     self.status = 9
-                    print("The invoice for payment was: ", message["1"])
+                    print("Step 4: The invoice for payment was: ", message["1"])
         else:
             print("Consumer's status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])
