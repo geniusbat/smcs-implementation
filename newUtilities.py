@@ -119,7 +119,6 @@ def invEn1(a:int,b:int,y:int):
 
 def en2(a:int,b:int,str:string):
     sl = [ord(i) for i in list(str)]
-    print(sl)
     for i in range(len(sl)):
         sl[i] = adderEncrypt(xorEncrypt(sl[i],a),b) % 256
     s=""

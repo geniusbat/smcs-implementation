@@ -73,6 +73,8 @@ class Consumer():
                 #Step 1.3
                 self.csk = message["B"] ** self.xA % self.p
                 self.xB1 = utilities.xorDecrypt(int(message["2"]),self.csk)
+                print(self.csk)
+                print(self.xB1)
                 if message["4"]==utilities.hmac(utilities.adderEncrypt(self.csk,self.xB1)):
                     shoppingMessage = utilities.invEn2(self.csk,self.xB1,message["3"])
                     print("Step 1.3: Shopping message received: ", shoppingMessage)

@@ -2,7 +2,6 @@ from merchant import Merchant
 from issuingBank import IssuingBank
 from acquiringBank import AcquiringBank
 from consumer import Consumer
-import utilities
 
 if __name__ == '__main__':
     merchant = Merchant()
