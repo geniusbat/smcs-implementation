@@ -119,8 +119,9 @@ def invEn1(a:int,b:int,y:int):
 
 def en2(a:int,b:int,str:string):
     sl = [ord(i) for i in list(str)]
+    print(sl)
     for i in range(len(sl)):
-        sl[i] = sl[i]+1 % 256
+        sl[i] = adderEncrypt(xorEncrypt(sl[i],a),b) % 256
     s=""
     for i in sl:
         s += chr(i)
@@ -129,7 +130,7 @@ def en2(a:int,b:int,str:string):
 def invEn2(a:int,b:int,cstr:string):
     cl = [ord(i) for i in list(cstr)]
     for i in range(len(cl)):
-        cl[i] = cl[i]-1 % 256
+        cl[i] = xorDecrypt(adderDecrypt(cl[i],b),a) % 256
     s=""
     for i in cl:
         s += chr(i)
