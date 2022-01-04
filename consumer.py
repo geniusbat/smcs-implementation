@@ -38,18 +38,21 @@ class Consumer():
     def __init__(self):
         self.selfId = random.randint(0,10000)
         self.status = 1
-        self.csk = 0
+        #RSA
         self.e = 7
         self.d = 3
-        self.N = 33
-        self.g = 6
-        self.p = 13
+        self.N = 33 
+        #Diffie
+        self.csk = 0
+        self.g = 6 #6
+        self.p = 13 #13
+
         self.cardNumber = 4916632844825070 #TODO: Aleatorize
         self.cAk = random.getrandbits(2)
         self.pw = "password"
         self.kPW = hash(self.pw)
         self.pXa = random.getrandbits(5)
-        self.xA = 5
+        self.xA = 11
         self.xA1 = 12
         self.xA2 = random.getrandbits(5)
         self.xA3 = random.getrandbits(5)
@@ -73,8 +76,7 @@ class Consumer():
                 #Step 1.3
                 self.csk = message["B"] ** self.xA % self.p
                 self.xB1 = utilities.xorDecrypt(int(message["2"]),self.csk)
-                print(self.csk)
-                print(self.xB1)
+                #print(self.csk>self.xB1)
                 if message["4"]==utilities.hmac(utilities.adderEncrypt(self.csk,self.xB1)):
                     shoppingMessage = utilities.invEn2(self.csk,self.xB1,message["3"])
                     print("Step 1.3: Shopping message received: ", shoppingMessage)

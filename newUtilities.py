@@ -92,6 +92,7 @@ def rsaDecrypt(y:int,d:int,N:int):
     return y**d % N
 
 def aesEncrypt(data, key):
+    #print("%d bytes)" % len(key))
     key = Padding.pad(bytes(key), 16)
     if isinstance(data, str):
         paddedData = Padding.pad(bytes(data, encoding='utf8'), 16)
@@ -120,6 +121,25 @@ def invEn1(a:int,b:int,y:int):
 def en2(a:int,b:int,str:string):
     sl = [ord(i) for i in list(str)]
     for i in range(len(sl)):
+        sl[i] = (sl[i] + 1) % 256
+    s=""
+    for i in sl:
+        s += chr(i)
+    return s
+
+def invEn2(a:int,b:int,cstr:string):
+    cl = [ord(i) for i in list(cstr)]
+    for i in range(len(cl)):
+        cl[i] = (cl[i] - 1) % 256
+    s=""
+    for i in cl:
+        s += chr(i)
+    return s
+
+'''
+def en2(a:int,b:int,str:string):
+    sl = [ord(i) for i in list(str)]
+    for i in range(len(sl)):
         sl[i] = adderEncrypt(xorEncrypt(sl[i],a),b) % 256
     s=""
     for i in sl:
@@ -134,7 +154,7 @@ def invEn2(a:int,b:int,cstr:string):
     for i in cl:
         s += chr(i)
     return s
-
+'''
 def hmac(message):
     return hash(message)
 

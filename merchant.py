@@ -19,8 +19,8 @@ class Merchant():
     def __init__(self):
         self.status = 1
         self.pXb = random.getrandbits(5)
-        self.xB = 4
-        self.xB1 = 12
+        self.xB = 51
+        self.xB1 = 3
         self.mAk = random.getrandbits(5)
     def init(self,con,acq):
         self.consumer=con
