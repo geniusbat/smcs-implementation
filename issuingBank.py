@@ -16,6 +16,7 @@ class IssuingBank():
     def __init__(self):
         pass
     def init(self,con,acq,mer):
+        self.times = dict()
         self.consumer=con
         self.acquiringBank=acq
         self.merchant = mer
@@ -48,4 +49,7 @@ class IssuingBank():
                             message7["1"] = confirmationMessage
                             message7["2"] = tradingResult
                             message7["3"] = paymentRequestMessage
+                            self.times["2.2"]=time.process_time()
                             self.acquiringBank.send(message7)
+                else:
+                    self.consumer.done=True

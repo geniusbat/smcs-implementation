@@ -36,6 +36,7 @@ class Consumer():
     merchant : Merchant
     issuinBank : IssuingBank
     def __init__(self):
+        self.times = dict()
         self.selfId = random.randint(0,10000)
         self.status = 1
         #RSA
@@ -57,6 +58,7 @@ class Consumer():
         self.xA2 = random.getrandbits(5)
         self.xA3 = random.getrandbits(5)
         self.xB1 = 0
+        self.done = False
     def init(self,mer,iss):
         self.merchant=mer
         self.issuinBank=iss
@@ -69,6 +71,7 @@ class Consumer():
         message1["shoppingList"] = shoppingList
         message1["g"]=self.g
         message1["p"]=self.p
+        self.times["1.1"]=time.process_time()
         self.merchant.send(message1)
     def send(self,message:Dict):    
         if message["op-code"]==self.status:
@@ -87,6 +90,7 @@ class Consumer():
                     message3["3"] = utilities.en1(self.csk, self.xB1, self.xA1)
                     message3["4"] = utilities.en2(self.csk, self.xA1, "Gustavo Molina, Avenida Reina Mercedes")
                     message3["5"] = utilities.hmac(utilities.adderEncrypt(self.xA1, self.csk))
+                    self.times["1.3"]=time.process_time()
                     self.merchant.send(message3)
             elif message["op-code"]==4:
                 #Step 2.1
@@ -107,6 +111,7 @@ class Consumer():
                         message5["5"] = utilities.en2(self.xA2, utilities.xorEncrypt(self.xA3, int(time.time())),paymentRequestMessage)
                         message5["6"] = utilities.xorEncrypt(self.xA1, utilities.aesResToInt(utilities.aesEncrypt(utilities.xorEncrypt(self.xA3, self.cAk),self.xA2)))
                         message5["7"] = utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk, self.xA2), self.xA3))
+                        self.times["2.1"]=time.process_time()
                         self.issuinBank.send(message5)
                     else:
                         print("Password was wrong")
@@ -115,9 +120,11 @@ class Consumer():
                     result = utilities.invEn2(self.csk, self.xA1, message["1"]).split(", ")[1]
                     print("The result of the request was: ", result)
                     self.status = 8
+            #Step 4
             elif message["op-code"]==8:
                 if message["2"] == utilities.hmac(utilities.adderEncrypt(self.csk, utilities.xorEncrypt(self.xA1, self.xB1))):
                     self.status = 9
                     print("Step 4: The invoice for payment was: ", message["1"])
+                    self.done = True
         else:
             print("Consumer's status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])

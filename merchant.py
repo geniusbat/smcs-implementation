@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, time
+import time 
 from typing import Dict
 import random
 import newUtilities as utilities
@@ -17,6 +18,7 @@ class Merchant():
     consumer : object
     acquiringBank : object
     def __init__(self):
+        self.times = dict()
         self.status = 1
         self.pXb = random.getrandbits(5)
         self.xB = 51
@@ -43,6 +45,7 @@ class Merchant():
                 shoppingMessage = ""; shoppingMessage += str(random.randint(0,10))+" "+message["shoppingList"]+" "+str(mDate)+" "+str(mtime)
                 message2["3"]=utilities.en2(self.csk,self.xB1,shoppingMessage)
                 message2["4"]=utilities.hmac(utilities.adderEncrypt(self.csk,self.xB1))
+                self.times["1.2"]=time.process_time()
                 self.consumer.send(message2)
             #1.4
             elif message["op-code"] == 3:
@@ -56,6 +59,7 @@ class Merchant():
                     shoppingAssociationMessage = consumerInfo + " , businessCert 40$ bankCode-10222, AvdManuelAltolaguirre, " + str(utilities.aesEncrypt(utilities.xorEncrypt(xA1,self.mAk),self.csk))
                     message4["1"]=utilities.en2(xA1,self.xB1,shoppingAssociationMessage)
                     message4["2"]=utilities.hmac(utilities.adderEncrypt(utilities.xorEncrypt(self.csk,self.xB1), xA1))
+                    self.times["1.4"]=time.process_time()
                     self.consumer.send(message4)
             #4
             elif message["op-code"] == 7:
@@ -65,6 +69,7 @@ class Merchant():
                 invoice = "This is the invoice"
                 message9["1"] = invoice
                 message9["2"] = utilities.hmac(utilities.adderEncrypt(self.csk, utilities.xorEncrypt(self.consumer.xA1,self.xB1)))
+                self.times["4"]=time.process_time()
                 self.consumer.send(message9)
         else:
             print("Merchant's status not equal to op-code, status: ", self.status, " op-code: ",message["op-code"])
